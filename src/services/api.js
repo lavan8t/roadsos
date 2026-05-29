@@ -1,4 +1,4 @@
-import { Hospital, ShieldAlert, Wrench, AlertCircle } from "lucide-react";
+import { Hospital, ShieldAlert, Wrench } from "lucide-react";
 import { C } from "../constants/theme";
 
 // Calculate distance using Haversine formula
@@ -17,16 +17,19 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 }
 
 // Fetch real nearby services using OpenStreetMap Overpass API
-export async function fetchRealNearbyServices(lat, lng, radius = 5000) {
-  // Query OSM for hospitals, police, and mechanics within 'radius' meters
+export async function fetchRealNearbyServices(lat, lng, radius = 8000) {
+  // Expanded to 8km
+  // 'nwr' catches Nodes, Ways (buildings), and Relations (campuses)
+  // 'out center' ensures we get a single lat/lng point even for large buildings
   const query = `
-    [out:json];
+    [out:json][timeout:15];
     (
-      node["amenity"="hospital"](around:${radius},${lat},${lng});
-      node["amenity"="police"](around:${radius},${lat},${lng});
-      node["shop"="car_repair"](around:${radius},${lat},${lng});
+      nwr["amenity"="hospital"](around:${radius},${lat},${lng});
+      nwr["amenity"="clinic"](around:${radius},${lat},${lng});
+      nwr["amenity"="police"](around:${radius},${lat},${lng});
+      nwr["shop"="car_repair"](around:${radius},${lat},${lng});
     );
-    out body 15;
+    out center 15;
   `;
 
   try {
@@ -43,44 +46,45 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000) {
     // Map OSM data to our App's standard format
     return data.elements
       .map((el) => {
-        const isHospital = el.tags?.amenity === "hospital";
+        const isMedical =
+          el.tags?.amenity === "hospital" || el.tags?.amenity === "clinic";
         const isPolice = el.tags?.amenity === "police";
 
-        let category = isHospital
-          ? "Hospital"
-          : isPolice
-            ? "Police"
-            : "Mechanic";
-        let icon = isHospital ? Hospital : isPolice ? ShieldAlert : Wrench;
-        let color = isHospital
+        let category = isMedical ? "Medical" : isPolice ? "Police" : "Mechanic";
+        let icon = isMedical ? Hospital : isPolice ? ShieldAlert : Wrench;
+        let color = isMedical
           ? C.greenContainer
           : isPolice
             ? C.blueContainer
             : C.surfaceContainerHigh;
-        let onColor = isHospital
+        let onColor = isMedical
           ? C.onGreenContainer
           : isPolice
             ? C.onBlueContainer
             : C.onSurface;
 
+        // Extract coordinates (Nodes use el.lat/lon, Ways/Relations use el.center.lat/lon)
+        const elLat = el.lat || el.center?.lat;
+        const elLng = el.lon || el.center?.lon;
+
         return {
           id: el.id,
           name: el.tags?.name || `Local ${category}`,
           category,
-          distance: getDistanceFromLatLonInKm(lat, lng, el.lat, el.lon) + " km",
+          distance: getDistanceFromLatLonInKm(lat, lng, elLat, elLng) + " km",
           phone:
-            el.tags?.phone || (isHospital ? "108" : isPolice ? "100" : "N/A"),
+            el.tags?.phone || (isMedical ? "108" : isPolice ? "100" : "N/A"),
           verified: !!el.tags?.name,
           icon,
           color,
           onColor,
-          lat: el.lat,
-          lng: el.lon,
+          lat: elLat,
+          lng: elLng,
         };
       })
       .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance)); // Sort by closest
   } catch (error) {
     console.error("Failed to fetch nearby places:", error);
-    return []; // Return empty array to fallback to UI empty states
+    return [];
   }
 }

@@ -2,13 +2,16 @@ import { useState, useEffect } from "react";
 
 export function useAppStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  // Defaulting to a central India coordinate if nothing is found,
-  // but will immediately try to get real device GPS
+
+  // Added rawLat and rawLng here so the Nearby API ALWAYS has data to fetch.
+  // Defaulted to Tiruppur, TN coordinates.
   const [location, setLocation] = useState({
-    lat: 20.5937,
-    lng: 78.9629,
+    lat: 11.1085,
+    lng: 77.3411,
     name: "Locating...",
     cached: true,
+    rawLat: 11.1085,
+    rawLng: 77.3411,
   });
 
   useEffect(() => {
