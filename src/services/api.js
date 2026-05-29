@@ -33,7 +33,7 @@ export async function fetchRealNearbyServices(lat, lng, radius = 8000) {
   `;
 
   try {
-    const response = await fetch(`https://overpass-api.de/api/interpreter`, {
+    const response = await fetch(`/api/overpass`, {
       method: "POST",
       body: `data=${encodeURIComponent(query)}`,
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
