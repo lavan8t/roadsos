@@ -1,9 +1,8 @@
 import { Hospital, ShieldAlert, Wrench } from "lucide-react";
 import { C } from "../constants/theme";
 
-// Calculate distance using Haversine formula
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of the earth in km
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
   const a =
@@ -16,34 +15,37 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   return (R * c).toFixed(1);
 }
 
-// Fetch real nearby services using OpenStreetMap Overpass API
 export async function fetchRealNearbyServices(lat, lng, radius = 8000) {
-  // Expanded to 8km
-  // 'nwr' catches Nodes, Ways (buildings), and Relations (campuses)
-  // 'out center' ensures we get a single lat/lng point even for large buildings
-  const query = `
-    [out:json][timeout:15];
-    (
-      nwr["amenity"="hospital"](around:${radius},${lat},${lng});
-      nwr["amenity"="clinic"](around:${radius},${lat},${lng});
-      nwr["amenity"="police"](around:${radius},${lat},${lng});
-      nwr["shop"="car_repair"](around:${radius},${lat},${lng});
-    );
-    out center 15;
-  `;
+  // 1. STRICT SAFETY CHECK: Prevent the API from crashing on bad data
+  if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+    console.warn("API paused: Waiting for valid GPS coordinates...");
+    return [];
+  }
+
+  // 2. The Query
+  const query = `[out:json][timeout:15];
+(
+  nwr["amenity"="hospital"](around:${radius},${lat},${lng});
+  nwr["amenity"="clinic"](around:${radius},${lat},${lng});
+  nwr["amenity"="police"](around:${radius},${lat},${lng});
+  nwr["shop"="car_repair"](around:${radius},${lat},${lng});
+);
+out center 15;`;
 
   try {
-    const response = await fetch(`/api/overpass`, {
+    // 3. THE FIX: Send a raw POST request with NO custom headers.
+    // This bypasses the strict CORS preflight and prevents the 406 error.
+    const response = await fetch("https://overpass-api.de/api/interpreter", {
       method: "POST",
-      body: `data=${encodeURIComponent(query)}`,
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: query,
     });
 
-    if (!response.ok) throw new Error("API request failed");
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
 
     const data = await response.json();
 
-    // Map OSM data to our App's standard format
     return data.elements
       .map((el) => {
         const isMedical =
@@ -63,7 +65,6 @@ export async function fetchRealNearbyServices(lat, lng, radius = 8000) {
             ? C.onBlueContainer
             : C.onSurface;
 
-        // Extract coordinates (Nodes use el.lat/lon, Ways/Relations use el.center.lat/lon)
         const elLat = el.lat || el.center?.lat;
         const elLng = el.lon || el.center?.lon;
 
@@ -82,9 +83,9 @@ export async function fetchRealNearbyServices(lat, lng, radius = 8000) {
           lng: elLng,
         };
       })
-      .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance)); // Sort by closest
+      .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
   } catch (error) {
-    console.error("Failed to fetch nearby places:", error);
+    console.error("Fetch Failed. The Overpass server might be busy:", error);
     return [];
   }
 }
