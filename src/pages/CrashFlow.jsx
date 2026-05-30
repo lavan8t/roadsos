@@ -4,9 +4,11 @@ import { ShieldAlert, XCircle, MessageCircleWarning, Activity } from "lucide-rea
 import { triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
 import { triggerHaptic } from "../components/Shared";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function CrashFlow({ location }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [countdown, setCountdown] = useState(10);
   const [isAborted, setIsAborted] = useState(false);
   const [isDispatched, setIsDispatched] = useState(false);
@@ -101,7 +103,7 @@ export default function CrashFlow({ location }) {
                 Crash Detected
               </h1>
               <p className="text-sm text-orange-200 font-medium">
-                Are you okay? Sending emergency SMS alerts in {countdown}s
+                {t("gen.cancel")}? Sending SMS in {countdown}s
               </p>
             </>
           ) : (
@@ -124,14 +126,14 @@ export default function CrashFlow({ location }) {
             onClick={handleAbort}
             className="w-full h-16 rounded-[24px] flex items-center justify-center gap-3 text-md font-black bg-white text-orange-950 border-none active:scale-95 transition-transform cursor-pointer"
           >
-            <XCircle className="h-5 w-5" /> I'm Safe (Cancel Alert)
+            <XCircle className="h-5 w-5" /> {t("gen.cancel")} Alert
           </button>
         ) : (
           <button
             onClick={() => navigate("/")}
             className="w-full h-16 rounded-[24px] flex items-center justify-center gap-3 text-md font-black bg-white/10 text-white border border-white/20 active:scale-95 transition-transform cursor-pointer"
           >
-            Return to Home
+            {t("gen.back")}
           </button>
         )}
       </div>

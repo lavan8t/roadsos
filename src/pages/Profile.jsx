@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ShieldAlert, Heart, Phone, Clock, Save, BellRing, FileJson, XCircle, MessageCircleWarning, QrCode } from "lucide-react";
+import { User, ShieldAlert, Heart, Phone, Clock, Save, BellRing, FileJson, XCircle, MessageCircleWarning, QrCode, Globe } from "lucide-react";
 import { PageHeader, triggerHaptic } from "../components/Shared";
 import { triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
 import EmergencyBeacon from "../components/EmergencyBeacon";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Profile({ location }) {
   const navigate = useNavigate();
+  const { t, lang, changeLang, LANGUAGES } = useLanguage();
 
   // Profile Info State
   const [profile, setProfile] = useState({
     name: "",
+    age: "",
+    gender: "",
     bloodGroup: "",
+    aadhaar: "",
     conditions: "",
     allergies: "",
     medications: "",
-    gender: "",
-    age: "",
     vehicle: "",
     lockScreenBeacon: true,
   });
@@ -149,7 +152,7 @@ export default function Profile({ location }) {
       className="h-[100dvh] flex flex-col p-6 overflow-y-auto pb-12"
       style={{ background: C.bg }}
     >
-      <PageHeader title="Emergency Profile" />
+      <PageHeader title={t("profile.title")} />
 
       <div className="flex flex-col gap-6 z-10 w-full max-w-md mx-auto">
         {/* Emergency Beacon QR */}
@@ -161,12 +164,12 @@ export default function Profile({ location }) {
           style={{ background: C.surfaceContainer }}
         >
           <h2 className="text-md font-black tracking-wider text-[#ffb4ab] uppercase flex items-center gap-2">
-            <Heart className="h-5 w-5 text-[#ff5449]" /> Emergency Info
+            <Heart className="h-5 w-5 text-[#ff5449]" /> {t("profile.emergencyInfo")}
           </h2>
 
           <div className="flex flex-col gap-3">
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-              Full Name
+              {t("profile.name")}
               <input
                 type="text"
                 value={profile.name}
@@ -179,7 +182,7 @@ export default function Profile({ location }) {
 
             <div className="grid grid-cols-2 gap-3">
               <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-                Age
+                {t("profile.age")}
                 <input
                   type="number"
                   value={profile.age}
@@ -191,7 +194,7 @@ export default function Profile({ location }) {
               </label>
 
               <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-                Gender
+                {t("profile.gender")}
                 <select
                   value={profile.gender}
                   onChange={e => {
@@ -210,7 +213,7 @@ export default function Profile({ location }) {
             </div>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-              Blood Group
+              {t("profile.blood")}
               <select
                 value={profile.bloodGroup}
                 onChange={e => {
@@ -233,7 +236,7 @@ export default function Profile({ location }) {
             </label>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-              Aadhaar Number
+              {t("profile.aadhaar")}
               <input
                 type="text"
                 value={profile.aadhaar || ""}
@@ -246,7 +249,7 @@ export default function Profile({ location }) {
             </label>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-              Medical Conditions
+              {t("profile.conditions")}
               <textarea
                 value={profile.conditions}
                 onChange={e => handleProfileChange("conditions", e.target.value)}
@@ -258,7 +261,7 @@ export default function Profile({ location }) {
             </label>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-              Allergies
+              {t("profile.allergies")}
               <textarea
                 value={profile.allergies}
                 onChange={e => handleProfileChange("allergies", e.target.value)}
@@ -270,7 +273,7 @@ export default function Profile({ location }) {
             </label>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-              Current Medications
+              {t("profile.medications")}
               <textarea
                 value={profile.medications}
                 onChange={e => handleProfileChange("medications", e.target.value)}
@@ -282,7 +285,7 @@ export default function Profile({ location }) {
             </label>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
-              Vehicle Number (Optional)
+              {t("profile.vehicle")}
               <input
                 type="text"
                 value={profile.vehicle}
@@ -301,7 +304,7 @@ export default function Profile({ location }) {
           style={{ background: C.surfaceContainer }}
         >
           <h2 className="text-md font-black tracking-wider text-[#ffb4ab] uppercase flex items-center gap-2">
-            <Phone className="h-5 w-5 text-[#ff5449]" /> Emergency Contacts
+            <Phone className="h-5 w-5 text-[#ff5449]" /> {t("profile.emergencyContacts")}
           </h2>
 
           {contacts.map((contact, index) => (
@@ -338,7 +341,7 @@ export default function Profile({ location }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-md font-black tracking-wider text-[#ffb4ab] uppercase flex items-center gap-2">
-              <User className="h-5 w-5 text-[#ff5449]" /> Emergency Beacon
+              <User className="h-5 w-5 text-[#ff5449]" /> {t("profile.emergencyBeacon")}
             </h2>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -354,7 +357,7 @@ export default function Profile({ location }) {
             </label>
           </div>
           <p className="text-[13px] text-[#d0c4b5] leading-relaxed">
-            Show Emergency Beacon automatically when app is opened (Lock Screen mode) to provide immediate responder access without navigation.
+            {t("profile.beaconDesc")}
           </p>
         </div>
 
@@ -365,7 +368,7 @@ export default function Profile({ location }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-md font-black tracking-wider text-[#ffb4ab] uppercase flex items-center gap-2">
-              <Clock className="h-5 w-5 text-[#ff5449]" /> Safety Timer
+              <Clock className="h-5 w-5 text-[#ff5449]" /> {t("profile.safetyTimer")}
             </h2>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -379,12 +382,12 @@ export default function Profile({ location }) {
           </div>
 
           <p className="text-[13px] text-[#d0c4b5] leading-relaxed">
-            Safety Timer automatically prompts you to verify you are safe at selected intervals. If you do not respond, an emergency alert is triggered.
+            {t("profile.timerDesc")}
           </p>
 
           {safetyCheckEnabled && (
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5 animate-slide-up">
-              Verification Interval
+              {t("profile.interval")}
               <select
                 value={safetyCheckInterval}
                 onChange={e => {
@@ -417,7 +420,7 @@ export default function Profile({ location }) {
           className="w-full h-16 rounded-[24px] flex items-center justify-center gap-3 text-[18px] font-black cursor-pointer border-none outline-none md-ripple active:scale-95 transition-all mb-2"
           style={{ background: C.primary, color: C.onPrimary }}
         >
-          <Save className="h-6 w-6" /> Save Profile
+          <Save className="h-6 w-6" /> {t("profile.save")}
         </button>
 
         <button
@@ -453,6 +456,29 @@ export default function Profile({ location }) {
             </div>
           </div>
         )}
+
+        {/* Language Selector */}
+        <div className="mt-2 rounded-[28px] p-5 flex flex-col gap-3" style={{ background: C.surfaceContainer }}>
+          <h2 className="text-md font-black tracking-wider text-[#ffb4ab] uppercase flex items-center gap-2">
+            <Globe className="h-5 w-5 text-[#ff5449]" /> Language
+          </h2>
+          <div className="flex gap-2">
+            {LANGUAGES.map(l => (
+              <button
+                key={l.code}
+                onClick={() => { triggerHaptic("light"); changeLang(l.code); }}
+                className="flex-1 h-11 rounded-xl text-sm font-bold border-none outline-none cursor-pointer active:scale-95 transition-all"
+                style={{
+                  background: lang === l.code ? C.primaryContainer : C.surfaceContainerHigh,
+                  color: lang === l.code ? C.onPrimaryContainer : C.onSurfaceVariant,
+                  border: lang === l.code ? `1.5px solid ${C.primary}` : "1.5px solid transparent",
+                }}
+              >
+                {l.nativeLabel}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Dev Options */}
         <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center gap-3">

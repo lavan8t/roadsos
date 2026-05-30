@@ -5,9 +5,11 @@ import { fetchRealNearbyServices, triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
 import { triggerHaptic } from "../components/Shared";
 import EmergencyBeacon from "../components/EmergencyBeacon";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function SosFlow({ location }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [countdown, setCountdown] = useState(3);
   const [isAborted, setIsAborted] = useState(false);
   const [isDialed, setIsDialed] = useState(false);
@@ -177,7 +179,7 @@ export default function SosFlow({ location }) {
           {!isDialed ? (
             <div className="animate-slide-up">
               <h1 className="text-3xl font-black mb-2 text-white tracking-wide">
-                SOS Triggered
+                {t("sos.trigger")}
               </h1>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-medium">
                 Auto-dialing 108 in {countdown}s
@@ -186,7 +188,7 @@ export default function SosFlow({ location }) {
           ) : (
             <div className="animate-slide-up">
               <h1 className="text-3xl font-black mb-2 text-red-400 tracking-wide">
-                Triggered
+                {t("sos.active")}
               </h1>
               <p className="text-sm text-white/70 font-medium mb-6">
                 108 Emergency Dialer Triggered
@@ -255,7 +257,7 @@ export default function SosFlow({ location }) {
           className="w-full py-4 rounded-[28px] flex items-center justify-center gap-2 text-sm font-bold border-none active:scale-95 transition-transform cursor-pointer md-ripple"
           style={{ background: C.surfaceContainer, color: C.onSurfaceVariant }}
         >
-          <XCircle className="h-5 w-5" /> {isDialed ? "I'm Safe (Return)" : "Cancel Alert"}
+          <XCircle className="h-5 w-5" /> {isDialed ? t("gen.back") + " (Safe)" : t("sos.cancel")}
         </button>
       </div>
     </div>

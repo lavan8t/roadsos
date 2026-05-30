@@ -8,9 +8,11 @@ import { useJourney } from "../hooks/useJourney";
 import { searchDestination } from "../services/api";
 import EmergencyBeacon, { decodeProfile } from "../components/EmergencyBeacon";
 import RescuerView from "../components/RescuerView";
+import { useLanguage } from "../context/LanguageContext";
 
 function DynamicIslandHeader({ isOnline, location }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   return (
     <div className="w-full bg-[#2b2927]/90 backdrop-blur-xl rounded-[32px] p-2 flex items-center justify-between border border-white/10 shadow-2xl pointer-events-auto">
       <div className="flex items-center gap-3 pl-3">
@@ -18,8 +20,8 @@ function DynamicIslandHeader({ isOnline, location }) {
            {isOnline ? <Wifi className="h-4 w-4 text-green-400" /> : <WifiOff className="h-4 w-4 text-red-400" />}
         </div>
         <div className="flex flex-col">
-          <span className="text-[9px] text-white/50 font-bold uppercase tracking-widest">{isOnline ? 'Network Active' : 'Offline Mode'}</span>
-          <span className="text-sm font-bold text-white truncate max-w-[180px]">{location?.name || "Locating..."}</span>
+          <span className="text-[9px] text-white/50 font-bold uppercase tracking-widest">{isOnline ? t("home.network") : t("home.offline")}</span>
+          <span className="text-sm font-bold text-white truncate max-w-[180px]">{location?.name || t("nearby.locating")}</span>
         </div>
       </div>
       <button 
@@ -33,11 +35,13 @@ function DynamicIslandHeader({ isOnline, location }) {
 }
 
 function JourneySetupModal({ onClose, onStart, location }) {
+  const { t } = useLanguage();
   const [dest, setDest] = useState("");
   const [mode, setMode] = useState("Car");
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   const modes = [
     { id: "Car", icon: Car },
@@ -46,10 +50,7 @@ function JourneySetupModal({ onClose, onStart, location }) {
     { id: "Bus", icon: Bus },
     { id: "Train", icon: Train }
   ];
-  
-  const [showInfo, setShowInfo] = useState(false);
 
-  // Debounced Search
   React.useEffect(() => {
     const fetchSuggestions = async () => {
       if (dest.length > 2 && !selectedPlace) {
@@ -82,7 +83,7 @@ function JourneySetupModal({ onClose, onStart, location }) {
       <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col p-6 rounded-t-[32px] animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.5)]" style={{ background: C.bg, height: '75vh' }}>
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-white leading-tight pr-4">Where are you heading towards?</h2>
+            <h2 className="text-xl font-bold text-white leading-tight pr-4">{t("home.whereHeading")}</h2>
             <button onClick={() => setShowInfo(!showInfo)} className="bg-transparent border-none text-blue-400 cursor-pointer shrink-0 mt-1">
               <ShieldAlert className="h-5 w-5" />
             </button>
@@ -93,8 +94,8 @@ function JourneySetupModal({ onClose, onStart, location }) {
         {showInfo && (
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 mb-6">
             <p className="text-xs text-blue-200 leading-relaxed font-medium m-0">
-              <strong className="text-blue-400 uppercase tracking-widest text-[10px] block mb-1">Safe Journey Guardian</strong>
-              SafeMiles will track your trip in the background. If you do not arrive at your destination by the expected time, we will automatically trigger an SOS to your emergency contacts.
+              <strong className="text-blue-400 uppercase tracking-widest text-[10px] block mb-1">{t("home.safeJourneyGuardian")}</strong>
+              {t("home.guardianDesc")}
             </p>
           </div>
         )}
@@ -104,7 +105,7 @@ function JourneySetupModal({ onClose, onStart, location }) {
             type="text" 
             value={dest}
             onChange={e => { setDest(e.target.value); setSelectedPlace(null); }}
-            placeholder="Search here..."
+            placeholder={t("home.searchHere")}
             className="w-full bg-[#2b2927] border border-white/10 rounded-2xl p-4 pr-12 text-white placeholder-white/30 font-medium outline-none focus:border-[#ffb4ab]"
           />
           {loading && !selectedPlace && (
@@ -122,7 +123,7 @@ function JourneySetupModal({ onClose, onStart, location }) {
           )}
         </div>
 
-        <label className="text-sm text-[#d0c4b5] mb-2 font-medium">Mode of Transport</label>
+        <label className="text-sm text-[#d0c4b5] mb-2 font-medium">{t("home.modeOfTransport")}</label>
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 hide-scrollbar">
           {modes.map(m => (
             <button key={m.id} onClick={() => setMode(m.id)} className={`flex items-center shrink-0 gap-2 px-4 py-3 rounded-xl border-none transition-all cursor-pointer ${mode === m.id ? 'bg-[#ffb4ab] text-[#690005]' : 'bg-[#2b2927] text-white/70'}`}>
@@ -133,7 +134,7 @@ function JourneySetupModal({ onClose, onStart, location }) {
         </div>
 
         <button onClick={handleStart} disabled={!selectedPlace} className="mt-auto w-full py-4 rounded-2xl bg-[#004a77] text-[#c1e8ff] font-bold text-lg border-none flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer md-ripple">
-          <Navigation className="h-5 w-5" /> Start Guardian Tracking
+          <Navigation className="h-5 w-5" /> {t("home.startGuardian")}
         </button>
       </div>
     </>
@@ -141,6 +142,7 @@ function JourneySetupModal({ onClose, onStart, location }) {
 }
 
 function ActiveJourneyCard({ journey, onEnd, onExtend }) {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const remainMs = journey.currentEta - Date.now();
@@ -163,7 +165,7 @@ function ActiveJourneyCard({ journey, onEnd, onExtend }) {
               {journey.destination}
             </p>
             <p className={`text-sm font-bold truncate ${isLate ? 'text-red-400 animate-pulse' : 'text-green-400'}`}>
-              {isLate ? 'ETA Expired - Escalating' : `Arrive by ${etaTimeString}`}
+              {isLate ? t("home.etaExpired") : `${t("home.arriveBy")} ${etaTimeString}`}
             </p>
           </div>
         </div>
@@ -177,7 +179,7 @@ function ActiveJourneyCard({ journey, onEnd, onExtend }) {
       <div className="p-4 flex items-center justify-between bg-black/20 border-b border-white/5">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-[11px] text-white/70 font-bold uppercase tracking-wide">Active Guardian</span>
+          <span className="text-[11px] text-white/70 font-bold uppercase tracking-wide">{t("home.activeGuardian")}</span>
         </div>
         <button onClick={() => setExpanded(false)} className="bg-white/5 hover:bg-white/10 p-1.5 rounded-full border-none cursor-pointer transition-colors">
           <ChevronUp className="h-5 w-5 text-white/70" />
@@ -190,18 +192,18 @@ function ActiveJourneyCard({ journey, onEnd, onExtend }) {
             <Navigation className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0 pr-2">
-            <p className="text-[12px] text-white/50 font-bold uppercase tracking-wider mb-0.5">Heading to</p>
+            <p className="text-[12px] text-white/50 font-bold uppercase tracking-wider mb-0.5">{t("home.headingTo")}</p>
             <h3 className="text-[17px] font-bold text-white leading-tight truncate">{journey.destination}</h3>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-black/20 rounded-2xl p-3 flex flex-col justify-center">
-            <p className="text-[11px] text-white/50 font-medium mb-1 flex items-center gap-1"><MapPin className="h-3 w-3" /> Distance</p>
+            <p className="text-[11px] text-white/50 font-medium mb-1 flex items-center gap-1"><MapPin className="h-3 w-3" /> {t("home.distance")}</p>
             <p className="text-sm font-bold text-white">{journey.distanceKm} km</p>
           </div>
           <div className="bg-black/20 rounded-2xl p-3 flex flex-col justify-center">
-            <p className="text-[11px] text-white/50 font-medium mb-1 flex items-center gap-1"><Clock className="h-3 w-3" /> Arrive by</p>
+            <p className="text-[11px] text-white/50 font-medium mb-1 flex items-center gap-1"><Clock className="h-3 w-3" /> {t("home.arriveBy")}</p>
             <p className={`text-sm font-bold ${isLate ? 'text-red-400' : 'text-white'}`}>
               {isLate ? 'Late' : etaTimeString}
             </p>
@@ -213,22 +215,22 @@ function ActiveJourneyCard({ journey, onEnd, onExtend }) {
             +15 Min
           </button>
           <button onClick={() => onEnd("completed")} className="flex-1 py-3 rounded-xl bg-green-600 text-white text-sm font-bold border-none shadow-lg cursor-pointer md-ripple">
-            End Journey
+            {t("home.endJourney")}
           </button>
         </div>
       </div>
 
       <button onClick={() => setShowTimeline(!showTimeline)} className="w-full py-3 bg-black/20 flex items-center justify-center gap-2 text-xs font-bold text-white/50 border-none cursor-pointer hover:bg-black/30 transition-colors">
-        {showTimeline ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />} Timeline
+        {showTimeline ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />} {t("home.timeline")}
       </button>
 
       {showTimeline && (
         <div className="p-4 bg-black/30 border-t border-white/5 flex flex-col gap-3 max-h-40 overflow-y-auto">
-          {journey.timeline.map((t, i) => (
+          {journey.timeline.map((entry, i) => (
             <div key={i} className="flex items-center gap-3">
-              <div className="text-[10px] text-white/40 font-mono w-10 shrink-0">{new Date(t.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+              <div className="text-[10px] text-white/40 font-mono w-10 shrink-0">{new Date(entry.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
               <div className="w-1.5 h-1.5 rounded-full bg-white/30 shrink-0" />
-              <div className="text-xs text-white/80 flex-1 truncate">{t.label}</div>
+              <div className="text-xs text-white/80 flex-1 truncate">{entry.label}</div>
             </div>
           ))}
         </div>
@@ -238,6 +240,7 @@ function ActiveJourneyCard({ journey, onEnd, onExtend }) {
 }
 
 function SafetyVerificationModal({ onExtend, onSOS, profile }) {
+  const { t } = useLanguage();
   return (
     <>
       <div className="fixed inset-0 z-50 bg-[#690005]/95 backdrop-blur-md animate-in fade-in duration-300" />
@@ -245,8 +248,8 @@ function SafetyVerificationModal({ onExtend, onSOS, profile }) {
         <div className="h-24 w-24 rounded-full bg-white/10 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(255,84,73,0.5)]">
           <ShieldAlert className="h-12 w-12 text-[#ffb4ab] animate-pulse" />
         </div>
-        <h2 className="text-2xl font-black text-white mb-2 text-center">Safety Check</h2>
-        <p className="text-center text-[#ffb4ab] mb-8 font-medium px-4">Your ETA has expired. Have you reached your destination safely?</p>
+        <h2 className="text-2xl font-black text-white mb-2 text-center">{t("home.safetyCheck")}</h2>
+        <p className="text-center text-[#ffb4ab] mb-8 font-medium px-4">{t("home.safetyCheckBody")}</p>
         
         <div className="w-full flex flex-col gap-3">
           {profile && (
@@ -255,14 +258,14 @@ function SafetyVerificationModal({ onExtend, onSOS, profile }) {
             </div>
           )}
           <button onClick={() => onExtend(0)} className="w-full py-4 rounded-2xl bg-[#ffb4ab] text-[#690005] font-black text-lg border-none flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-xl cursor-pointer">
-            <Check className="h-6 w-6" /> Yes, I Reached Safely
+            <Check className="h-6 w-6" /> {t("home.reachedSafely")}
           </button>
           <button onClick={() => onExtend(15)} className="w-full py-4 rounded-2xl bg-white/10 text-white font-bold text-lg border border-white/20 flex items-center justify-center gap-2 active:scale-95 transition-transform cursor-pointer">
-            <Clock className="h-6 w-6" /> Extend Journey (+15 min)
+            <Clock className="h-6 w-6" /> {t("home.extendJourney")}
           </button>
           
           <div className="mt-8 flex flex-col items-center gap-3 w-full px-4">
-            <div className="text-xs text-white/50 uppercase tracking-widest font-bold">Auto SOS Trigger in 2 minutes</div>
+            <div className="text-xs text-white/50 uppercase tracking-widest font-bold">{t("home.autoSos")}</div>
             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full bg-red-500 w-full animate-shrink-timer origin-left" />
             </div>
@@ -274,13 +277,14 @@ function SafetyVerificationModal({ onExtend, onSOS, profile }) {
 }
 
 function JourneyHistory({ history }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   if (!history || history.length === 0) return null;
 
   return (
     <div className="w-full z-10 rounded-3xl overflow-hidden border border-white/5 bg-[#2b2927]/90 backdrop-blur-md">
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex items-center justify-between border-none bg-transparent text-white font-bold text-sm cursor-pointer hover:bg-white/5 transition-colors">
-        <div className="flex items-center gap-2"><History className="h-4 w-4 opacity-50" /> Journey History</div>
+        <div className="flex items-center gap-2"><History className="h-4 w-4 opacity-50" /> {t("home.journeyHistory")}</div>
         {open ? <ChevronDown className="h-4 w-4 opacity-50" /> : <ChevronUp className="h-4 w-4 opacity-50" />}
       </button>
       {open && (
@@ -302,6 +306,7 @@ function JourneyHistory({ history }) {
 
 export default function Home({ status }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [showNearby, setShowNearby] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
   const { isOnline, location } = status;
@@ -311,6 +316,7 @@ export default function Home({ status }) {
   const [profileData, setProfileData] = useState(null);
   const [showRescuerView, setShowRescuerView] = useState(false);
   const [rescuerProfile, setRescuerProfile] = useState(null);
+
 
   React.useEffect(() => {
     // Check if this is a QR scan hit
@@ -392,22 +398,22 @@ export default function Home({ status }) {
           <div className="pointer-events-auto flex flex-col gap-3 w-full">
             {!journey.activeJourney && (
               <button onClick={() => setShowSetup(true)} className="w-full py-4 rounded-2xl bg-[#004a77]/80 text-[#c1e8ff] font-bold text-sm border border-[#004a77]/50 flex items-center justify-center gap-2 md-ripple cursor-pointer backdrop-blur-xl shadow-lg">
-                <Navigation className="h-5 w-5" /> Where are you heading towards?
+                <Navigation className="h-5 w-5" /> {t("home.whereHeading")}
               </button>
             )}
 
             <div className="grid grid-cols-3 gap-3 w-full">
               <button onClick={() => setShowNearby(true)} className="flex flex-col items-center justify-center gap-2 rounded-[20px] p-3 cursor-pointer md-ripple border border-white/10 h-20 bg-[#2b2927]/90 backdrop-blur-xl text-[#d0c4b5] shadow-lg">
                 <Plus className="h-8 w-8 text-[#ffb4ab]" strokeWidth={3} />
-                <span className="text-xs font-bold">Nearby</span>
+                <span className="text-xs font-bold">{t("home.nearby")}</span>
               </button>
               <button onClick={() => navigator.share?.({ title: "My Location", text: `I need help at ${location.lat}, ${location.lng}` })} className="flex flex-col items-center justify-center gap-2 rounded-[20px] p-3 cursor-pointer md-ripple border border-[#004a77]/30 h-20 bg-[#004a77]/90 backdrop-blur-xl text-[#c1e8ff] shadow-lg">
                 <Compass className="h-8 w-8 text-[#c1e8ff]" />
-                <span className="text-xs font-bold">Share Loc</span>
+                <span className="text-xs font-bold">{t("home.shareLoc")}</span>
               </button>
               <button onClick={() => navigate("/report")} className="flex flex-col items-center justify-center gap-2 rounded-[20px] p-3 cursor-pointer md-ripple border border-[#4b4319]/30 h-20 bg-[#4b4319]/90 backdrop-blur-xl text-[#e8d468] shadow-lg">
                 <FileWarning className="h-8 w-8 text-[#e8d468]" />
-                <span className="text-xs font-bold">Report</span>
+                <span className="text-xs font-bold">{t("home.report")}</span>
               </button>
             </div>
             

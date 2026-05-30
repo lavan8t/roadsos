@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MapPin, Check } from "lucide-react";
 import { PageHeader } from "../components/Shared";
 import { C } from "../constants/theme";
+import { useLanguage } from "../context/LanguageContext";
 
 const INCIDENT_TYPES = [
   "Road Accident",
@@ -15,6 +16,7 @@ const INCIDENT_TYPES = [
 
 export default function ReportIncident({ location }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [selectedType, setSelectedType] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -35,7 +37,7 @@ export default function ReportIncident({ location }) {
           onClick={() => navigate("/")}
           className="w-full max-w-xs py-4 rounded-full font-bold bg-[#363431] text-white active:scale-95 transition-transform border-none outline-none"
         >
-          Return Home
+          {t("gen.back")}
         </button>
       </div>
     );
