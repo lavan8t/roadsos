@@ -56,7 +56,7 @@ export default function RescuerView({ profile, onClose }) {
             </div>
             <div>
               <h1 className="text-sm font-black uppercase tracking-widest text-red-400 m-0">Medical ID</h1>
-              <p className="text-xs text-red-200/70 m-0 mt-0.5">Scanned via RoadSOS Beacon</p>
+              <p className="text-xs text-red-200/70 m-0 mt-0.5">Scanned via SafeMiles Beacon</p>
             </div>
           </div>
 
@@ -149,7 +149,7 @@ export default function RescuerView({ profile, onClose }) {
         
         <div className="mt-8 text-center px-6">
           <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
-            Provided securely via RoadSOS Medical Identity
+            Provided securely via SafeMiles Medical Identity
           </p>
         </div>
       </div>

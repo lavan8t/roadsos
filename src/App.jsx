@@ -46,7 +46,7 @@ function LocationBlockedScreen({ retry }) {
             className="text-[14px] leading-relaxed mb-4 text-balance"
             style={{ color: C.onSurfaceVariant }}
           >
-            RoadSOS cannot function without location access. We need your coordinates to find nearby emergency services and dispatch help.
+            SafeMiles cannot function without location access. We need your coordinates to find nearby emergency services and dispatch help.
           </p>
           <div
             className="p-3.5 rounded-2xl text-[12px] text-left leading-normal"
@@ -80,7 +80,7 @@ function LocationLoadingScreen() {
           className="text-[28px] tracking-wide roadsos-title"
           style={{ color: C.onSurface }}
         >
-          RoadSOS
+          Safe<span className="text-[#ffb4ab]">Miles</span>
         </h1>
         <p className="text-[14px]" style={{ color: C.onSurfaceVariant }}>
           Securing safe connection and live GPS location...

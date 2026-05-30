@@ -94,7 +94,7 @@ function JourneySetupModal({ onClose, onStart, location }) {
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 mb-6">
             <p className="text-xs text-blue-200 leading-relaxed font-medium m-0">
               <strong className="text-blue-400 uppercase tracking-widest text-[10px] block mb-1">Safe Journey Guardian</strong>
-              RoadSOS will track your trip in the background. If you do not arrive at your destination by the expected time, we will automatically trigger an SOS to your emergency contacts.
+              SafeMiles will track your trip in the background. If you do not arrive at your destination by the expected time, we will automatically trigger an SOS to your emergency contacts.
             </p>
           </div>
         )}

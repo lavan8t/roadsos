@@ -213,7 +213,7 @@ export async function fetchAreaName(lat, lng) {
       {
         headers: {
           "Accept-Language": "en",
-          "User-Agent": "RoadSOS-PWA-App",
+          "User-Agent": "SafeMiles-PWA-App",
         },
       }
     );
@@ -299,7 +299,7 @@ export async function searchDestination(query, currentLat, currentLng) {
     }
 
     const res = await fetch(url, {
-      headers: { "User-Agent": "RoadSOS-PWA-App" }
+      headers: { "User-Agent": "SafeMiles-PWA-App" }
     });
 
     if (!res.ok) return [];

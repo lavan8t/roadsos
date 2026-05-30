@@ -1,6 +1,6 @@
 {
-  "name": "RoadSOS",
-  "short_name": "RoadSOS",
+  "name": "SafeMiles",
+  "short_name": "SafeMiles",
   "description": "Emergency roadside assistance at your fingertips. Call for help instantly.",
   "start_url": "/",
   "display": "standalone",

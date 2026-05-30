@@ -49,7 +49,7 @@ export function StatusHeader({ isOnline }) {
           className="text-[24px] tracking-wide roadsos-title"
           style={{ color: C.onSurface }}
         >
-          RoadSOS
+          Safe<span className="text-[#ff5449]">Miles</span>
         </h1>
       </div>
 

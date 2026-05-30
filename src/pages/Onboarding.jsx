@@ -46,7 +46,7 @@ export default function Onboarding({ finishOnboarding }) {
             );
         } else {
             setLoading(false);
-            setErrorMsg("Geolocation is not supported by your browser. RoadSOS requires location access to work.");
+            setErrorMsg("Geolocation is not supported by your browser. SafeMiles requires location access to work.");
         }
     };
 
@@ -136,7 +136,7 @@ export default function Onboarding({ finishOnboarding }) {
                     {/* Text Details */}
                     <div>
                         <h1 className="text-[32px] tracking-wide mb-3 roadsos-title" style={{ color: C.onSurface }}>
-                            Road<span style={{ color: C.primary }}>SOS</span>
+                            Safe<span style={{ color: C.primary }}>Miles</span>
                         </h1>
                         <p className="text-[16px] leading-relaxed mb-6" style={{ color: C.onSurfaceVariant }}>
                             Your rapid response roadside assistant. We connect you to nearby hospitals, police, and mechanics instantly.
@@ -145,7 +145,7 @@ export default function Onboarding({ finishOnboarding }) {
                         <div className="p-4 rounded-[24px] text-left flex items-start gap-4 mb-4" style={{ background: C.surfaceContainer }}>
                             <MapPin className="h-6 w-6 flex-shrink-0 mt-1" style={{ color: C.primary }} />
                             <p className="text-[14px]" style={{ color: C.onSurface }}>
-                                To find help near you and share your emergency coordinates, <strong style={{ color: C.primary }}>RoadSOS needs access to your location.</strong>
+                                To find help near you and share your emergency coordinates, <strong style={{ color: C.primary }}>SafeMiles needs access to your location.</strong>
                             </p>
                         </div>
 
