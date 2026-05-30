@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, Navigation, XCircle, Loader2, TriangleAlert, MessageCircleWarning } from "lucide-react";
+import { Phone, Navigation, XCircle, Loader2, TriangleAlert, MessageCircleWarning, QrCode } from "lucide-react";
 import { fetchRealNearbyServices, triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
 import { triggerHaptic } from "../components/Shared";
@@ -13,6 +13,7 @@ export default function SosFlow({ location }) {
   const [isDialed, setIsDialed] = useState(false);
   const [nearestHospital, setNearestHospital] = useState(null);
   const [loadingHospital, setLoadingHospital] = useState(true);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const contactsRef = useRef([]);
   const [profile, setProfile] = useState(null);
@@ -106,9 +107,39 @@ export default function SosFlow({ location }) {
 
   return (
     <div
-      className="min-h-screen flex flex-col p-6 transition-all duration-500 justify-between items-center relative overflow-hidden"
+      className="min-h-screen flex flex-col p-6 transition-all duration-500 justify-between items-center relative overflow-y-auto"
       style={{ background: C.bg }}
     >
+      {/* QR Code Icon Button */}
+      {profile && (
+        <button 
+          onClick={() => setShowQrModal(true)}
+          className="absolute top-6 right-6 h-12 w-12 rounded-full flex items-center justify-center cursor-pointer border border-white/20 shadow-lg active:scale-95 transition-all z-50 bg-black/50 backdrop-blur-md"
+        >
+          <QrCode className="h-6 w-6 text-white" />
+        </button>
+      )}
+
+      {/* QR Code Modal Popup */}
+      {showQrModal && profile && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-6 backdrop-blur-md" style={{ background: "rgba(0,0,0,0.8)" }}>
+          <div className="w-full max-w-sm relative flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowQrModal(false)}
+              className="absolute -top-12 right-0 h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-white border-none cursor-pointer hover:bg-white/20 active:scale-95 transition-all z-10"
+            >
+              <XCircle className="h-6 w-6" />
+            </button>
+            <div 
+              className="w-full rounded-[32px] p-5 flex flex-col items-center justify-center border border-white/5 shadow-xl"
+              style={{ background: C.surfaceContainer }}
+            >
+              <EmergencyBeacon profile={profile} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Subtle Emergency Glow */}
       <div 
         className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${isDialed ? 'opacity-20' : 'opacity-60'}`}
@@ -117,9 +148,8 @@ export default function SosFlow({ location }) {
 
       <div className="flex-1 flex flex-col items-center justify-center gap-10 w-full max-w-sm relative z-10">
         <div className="relative flex items-center justify-center h-64 w-64">
-          <div className="absolute inset-0 rounded-full bg-red-500/10 animate-ping" style={{ animationDuration: "3s" }} />
-          <div className="absolute inset-6 rounded-full bg-red-500/20 animate-ping" style={{ animationDuration: "2s" }} />
-          <div className="absolute inset-12 rounded-full bg-red-500/30 animate-ping" style={{ animationDuration: "1s" }} />
+          {/* Animations removed per user request */}
+          
           
           <div
             className="absolute inset-16 rounded-full flex flex-col items-center justify-center shadow-2xl active:scale-95 transition-transform"
@@ -130,18 +160,14 @@ export default function SosFlow({ location }) {
           >
             {!isDialed ? (
               <div className="flex flex-col items-center gap-2 select-none relative w-full h-full justify-center">
-                <TriangleAlert
-                  className="h-14 w-14 mb-1 animate-pulse"
-                  strokeWidth={2.5}
-                />
-                <span className="text-[36px] font-black leading-none tracking-widest">
+                <span className="text-[52px] font-black leading-none tracking-widest">
                   {countdown}s
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2 select-none text-center justify-center">
-                <Phone className="h-14 w-14 text-white animate-pulse" strokeWidth={2} />
-                <span className="text-[14px] uppercase font-black tracking-widest mt-2">SOS ACTIVE</span>
+                <Phone className="h-14 w-14 text-white" strokeWidth={2} />
+                <span className="text-[14px] uppercase font-black tracking-widest mt-2">TRIGGERED</span>
               </div>
             )}
           </div>
@@ -159,8 +185,8 @@ export default function SosFlow({ location }) {
             </div>
           ) : (
             <div className="animate-slide-up">
-              <h1 className="text-3xl font-black mb-2 text-red-400 tracking-wide animate-pulse">
-                SOS Active
+              <h1 className="text-3xl font-black mb-2 text-red-400 tracking-wide">
+                Triggered
               </h1>
               <p className="text-sm text-white/70 font-medium mb-6">
                 108 Emergency Dialer Triggered
@@ -183,11 +209,6 @@ export default function SosFlow({ location }) {
       {/* Hospital details & abort buttons */}
       {/* Hospital & Actions Container */}
       <div className="flex flex-col gap-3 z-10 w-full max-w-sm">
-        {profile && (
-          <div className="mb-2">
-            <EmergencyBeacon profile={profile} />
-          </div>
-        )}
         <div
           className="w-full rounded-[32px] p-5 flex flex-col gap-3 border border-white/5 shadow-xl"
           style={{ background: C.surfaceContainerHigh }}
