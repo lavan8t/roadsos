@@ -183,3 +183,12 @@
 .animate-blink {
   animation: blink 4s infinite;
 }
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.animate-shrink-timer {
+  animation: shrink 120s linear forwards;
+}

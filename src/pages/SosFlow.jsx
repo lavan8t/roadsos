@@ -4,6 +4,7 @@ import { Phone, Navigation, XCircle, Loader2, TriangleAlert, MessageCircleWarnin
 import { fetchRealNearbyServices, triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
 import { triggerHaptic } from "../components/Shared";
+import EmergencyBeacon from "../components/EmergencyBeacon";
 
 export default function SosFlow({ location }) {
   const navigate = useNavigate();
@@ -14,14 +15,18 @@ export default function SosFlow({ location }) {
   const [loadingHospital, setLoadingHospital] = useState(true);
 
   const contactsRef = useRef([]);
-  const profileRef = useRef(null);
+  const [profile, setProfile] = useState(null);
 
   // Load profile and contacts from localStorage
   useEffect(() => {
     try {
       const savedProfile = localStorage.getItem("roadsos_profile_info");
       const savedContacts = localStorage.getItem("roadsos_profile_contacts");
-      if (savedProfile) profileRef.current = JSON.parse(savedProfile);
+      if (savedProfile) {
+        const p = JSON.parse(savedProfile);
+        p.contacts = savedContacts ? JSON.parse(savedContacts) : [];
+        setProfile(p);
+      }
       if (savedContacts) contactsRef.current = JSON.parse(savedContacts);
     } catch (e) {
       console.error("Failed to load profile/contacts", e);
@@ -101,26 +106,26 @@ export default function SosFlow({ location }) {
 
   return (
     <div
-      className="min-h-screen flex flex-col p-6 transition-all duration-500 justify-between items-center"
-      style={{
-        background: isDialed
-          ? "radial-gradient(circle, #aa000f 0%, #0d0a0a 100%)"
-          : "radial-gradient(circle, #690005 0%, #0d0a0a 100%)"
-      }}
+      className="min-h-screen flex flex-col p-6 transition-all duration-500 justify-between items-center relative overflow-hidden"
+      style={{ background: C.bg }}
     >
-      {/* Centered Pulsing SOS Circle Visuals */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-8 w-full max-w-sm">
-        <div className="relative flex items-center justify-center h-52 w-52">
-          {/* Animated concentric rings */}
-          <div className="absolute inset-0 rounded-full bg-red-600/10 animate-ping" style={{ animationDuration: "3s" }} />
-          <div className="absolute inset-4 rounded-full bg-red-600/20 animate-ping" style={{ animationDuration: "2s" }} />
-          <div className="absolute inset-8 rounded-full bg-red-600/30 animate-ping" style={{ animationDuration: "1s" }} />
+      {/* Subtle Emergency Glow */}
+      <div 
+        className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${isDialed ? 'opacity-20' : 'opacity-60'}`}
+        style={{ background: "radial-gradient(circle at center, #8a0012 0%, transparent 70%)" }}
+      />
+
+      <div className="flex-1 flex flex-col items-center justify-center gap-10 w-full max-w-sm relative z-10">
+        <div className="relative flex items-center justify-center h-64 w-64">
+          <div className="absolute inset-0 rounded-full bg-red-500/10 animate-ping" style={{ animationDuration: "3s" }} />
+          <div className="absolute inset-6 rounded-full bg-red-500/20 animate-ping" style={{ animationDuration: "2s" }} />
+          <div className="absolute inset-12 rounded-full bg-red-500/30 animate-ping" style={{ animationDuration: "1s" }} />
           
           <div
-            className="absolute inset-12 rounded-full flex flex-col items-center justify-center md-elevation-4 border-none text-white select-none active:scale-95 transition-transform"
+            className="absolute inset-16 rounded-full flex flex-col items-center justify-center shadow-2xl active:scale-95 transition-transform"
             style={{
               background: C.sosRed,
-              boxShadow: "0 0 40px rgba(255, 59, 48, 0.6)"
+              color: "#ffffff"
             }}
           >
             {!isDialed ? (
@@ -144,64 +149,70 @@ export default function SosFlow({ location }) {
 
         <div className="text-center">
           {!isDialed ? (
-            <>
-              <h1 className="text-3xl font-black mb-1 text-white tracking-widest uppercase">
+            <div className="animate-slide-up">
+              <h1 className="text-3xl font-black mb-2 text-white tracking-wide">
                 SOS Triggered
               </h1>
-              <p className="text-sm text-red-300 font-medium">
-                Auto-dialing 108 and sharing coordinates in {countdown}s
-              </p>
-            </>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-medium">
+                Auto-dialing 108 in {countdown}s
+              </div>
+            </div>
           ) : (
-            <>
-              <h1 className="text-3xl font-black mb-1 text-red-400 tracking-widest uppercase animate-pulse">
+            <div className="animate-slide-up">
+              <h1 className="text-3xl font-black mb-2 text-red-400 tracking-wide animate-pulse">
                 SOS Active
               </h1>
-              <p className="text-sm text-green-300 font-bold mb-4">
-                108 Dialer Triggered
+              <p className="text-sm text-white/70 font-medium mb-6">
+                108 Emergency Dialer Triggered
               </p>
               <button
                 onClick={() => {
                   triggerHaptic("heavy");
-                  triggerEmergencySMS(profileRef.current, contactsRef.current, location);
+                  triggerEmergencySMS(profile, contactsRef.current, location);
                 }}
-                className="w-full max-w-[200px] h-12 mx-auto rounded-full flex items-center justify-center gap-2 text-sm font-bold bg-orange-600 text-white border-none active:scale-95 transition-transform cursor-pointer shadow-lg shadow-orange-600/30"
+                className="w-full max-w-[220px] mx-auto py-4 rounded-full flex items-center justify-center gap-2 text-sm font-bold border-none active:scale-95 transition-all shadow-lg cursor-pointer md-ripple"
+                style={{ background: "#ff8c00", color: "#000000" }}
               >
-                <MessageCircleWarning className="h-4 w-4" /> Send SMS Alerts
+                <MessageCircleWarning className="h-5 w-5" /> Send SMS Alerts
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
 
       {/* Hospital details & abort buttons */}
-      <div className="flex flex-col gap-4 z-10 pb-8 w-full max-w-sm">
-        {/* Nearest Hospital Card */}
+      {/* Hospital & Actions Container */}
+      <div className="flex flex-col gap-3 z-10 w-full max-w-sm">
+        {profile && (
+          <div className="mb-2">
+            <EmergencyBeacon profile={profile} />
+          </div>
+        )}
         <div
-          className="w-full rounded-[28px] p-5 flex flex-col gap-3 text-left border border-white/10"
-          style={{ background: "rgba(30, 27, 26, 0.5)", backdropFilter: "blur(10px)" }}
+          className="w-full rounded-[32px] p-5 flex flex-col gap-3 border border-white/5 shadow-xl"
+          style={{ background: C.surfaceContainerHigh }}
         >
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-red-400">
-              Nearest Hospital Navigation
-            </p>
-            {loadingHospital ? (
-              <div className="flex items-center gap-2 mt-1.5">
-                <Loader2 className="h-4 w-4 animate-spin text-red-400" />
-                <span className="text-sm text-white/50">Resolving coordinates...</span>
-              </div>
-            ) : nearestHospital ? (
-              <>
-                <h3 className="text-[17px] font-black text-white mt-1 leading-tight">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0" style={{ background: C.primaryContainer, color: C.onPrimaryContainer }}>
+              <TriangleAlert className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-red-400 mb-0.5">
+                Nearest Medical Facility
+              </p>
+              {loadingHospital ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-white/50" />
+                  <span className="text-sm font-medium text-white/50">Locating...</span>
+                </div>
+              ) : nearestHospital ? (
+                <h3 className="text-sm font-bold text-white truncate leading-tight">
                   {nearestHospital.name}
                 </h3>
-                <p className="text-xs text-white/70 mt-1">
-                  Distance: <strong className="text-red-400">{nearestHospital.distance}</strong>
-                </p>
-              </>
-            ) : (
-              <span className="text-sm text-white/60">Search failed. Use 108 emergency dialer.</span>
-            )}
+              ) : (
+                <span className="text-sm font-medium text-white/50">Unavailable</span>
+              )}
+            </div>
           </div>
 
           {nearestHospital && (
@@ -210,17 +221,18 @@ export default function SosFlow({ location }) {
               target="_blank"
               rel="noreferrer"
               onClick={() => triggerHaptic("light")}
-              className="mt-1 w-full rounded-2xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white bg-red-700 hover:bg-red-600 active:scale-95 transition-transform border-none outline-none cursor-pointer no-underline"
+              className="mt-2 w-full rounded-2xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm border-none outline-none cursor-pointer no-underline md-ripple"
+              style={{ background: C.primary, color: C.onPrimary }}
             >
               <Navigation className="h-4 w-4" /> Navigate Now
             </a>
           )}
         </div>
 
-        {/* Abort button */}
         <button
           onClick={handleAbort}
-          className="w-full h-15 rounded-[24px] flex items-center justify-center gap-3 text-md font-black bg-white text-red-950 border-none active:scale-95 transition-transform cursor-pointer"
+          className="w-full py-4 rounded-[28px] flex items-center justify-center gap-2 text-sm font-bold border-none active:scale-95 transition-transform cursor-pointer md-ripple"
+          style={{ background: C.surfaceContainer, color: C.onSurfaceVariant }}
         >
           <XCircle className="h-5 w-5" /> {isDialed ? "I'm Safe (Return)" : "Cancel Alert"}
         </button>

@@ -8,10 +8,10 @@ import { C } from "../constants/theme";
 const CATEGORIES = [
   { id: "Medical", name: "Hospitals", icon: Hospital, color: C.greenContainer, onColor: C.onGreenContainer },
   { id: "Police", name: "Police", icon: ShieldAlert, color: C.blueContainer, onColor: C.onBlueContainer },
-  { id: "Mechanic", name: "Mechanics", icon: Wrench, color: C.surfaceContainerHigh, onColor: C.onYellowContainer },
-  { id: "Puncture Shop", name: "Puncture", icon: CircleDot, color: C.surfaceContainerHigh, onColor: C.onYellowContainer },
-  { id: "Fuel Station", name: "Fuel", icon: Fuel, color: C.surfaceContainerHigh, onColor: "#fb923c" },
-  { id: "Nearby City", name: "Cities", icon: MapPin, color: C.surfaceContainerHigh, onColor: C.onSurface },
+  { id: "Mechanic", name: "Mechanics", icon: Wrench, color: "#b45309", onColor: "#ffffff" },
+  { id: "Puncture Shop", name: "Puncture", icon: CircleDot, color: "#d97706", onColor: "#ffffff" },
+  { id: "Fuel Station", name: "Fuel", icon: Fuel, color: "#be123c", onColor: "#ffffff" },
+  { id: "Nearby City", name: "Cities", icon: MapPin, color: "#6b21a8", onColor: "#ffffff" },
 ];
 
 export default function NearbyHelp({ location, onClose }) {

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ShieldAlert, Heart, Phone, Clock, Save, BellRing, FileJson, XCircle, MessageCircleWarning } from "lucide-react";
+import { User, ShieldAlert, Heart, Phone, Clock, Save, BellRing, FileJson, XCircle, MessageCircleWarning, QrCode } from "lucide-react";
 import { PageHeader, triggerHaptic } from "../components/Shared";
 import { triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
+import EmergencyBeacon from "../components/EmergencyBeacon";
 
 export default function Profile({ location }) {
   const navigate = useNavigate();
@@ -14,6 +15,11 @@ export default function Profile({ location }) {
     bloodGroup: "",
     conditions: "",
     allergies: "",
+    medications: "",
+    gender: "",
+    age: "",
+    vehicle: "",
+    lockScreenBeacon: true,
   });
 
   // Emergency Contacts State
@@ -142,6 +148,9 @@ export default function Profile({ location }) {
       <PageHeader title="Emergency Profile" />
 
       <div className="flex flex-col gap-6 z-10 w-full max-w-md mx-auto">
+        {/* Emergency Beacon QR */}
+        <EmergencyBeacon profile={profile} defaultExpanded={true} />
+
         {/* Section 1: Emergency Information */}
         <div
           className="rounded-[28px] p-5 flex flex-col gap-4"
@@ -163,6 +172,38 @@ export default function Profile({ location }) {
                 style={{ background: C.surfaceContainerHigh }}
               />
             </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
+                Age
+                <input
+                  type="number"
+                  value={profile.age}
+                  onChange={e => handleProfileChange("age", e.target.value)}
+                  placeholder="e.g. 35"
+                  className="h-12 px-4 rounded-xl border-none outline-none text-white text-sm font-medium"
+                  style={{ background: C.surfaceContainerHigh }}
+                />
+              </label>
+
+              <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
+                Gender
+                <select
+                  value={profile.gender}
+                  onChange={e => {
+                    triggerHaptic("light");
+                    handleProfileChange("gender", e.target.value);
+                  }}
+                  className="h-12 px-4 rounded-xl border-none outline-none text-white text-sm font-medium"
+                  style={{ background: C.surfaceContainerHigh }}
+                >
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+            </div>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
               Blood Group
@@ -210,6 +251,30 @@ export default function Profile({ location }) {
                 style={{ background: C.surfaceContainerHigh }}
               />
             </label>
+
+            <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
+              Current Medications
+              <textarea
+                value={profile.medications}
+                onChange={e => handleProfileChange("medications", e.target.value)}
+                placeholder="e.g. Inhaler, Insulin"
+                rows={2}
+                className="p-3.5 rounded-xl border-none outline-none text-white text-sm font-medium resize-none"
+                style={{ background: C.surfaceContainerHigh }}
+              />
+            </label>
+
+            <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
+              Vehicle Number (Optional)
+              <input
+                type="text"
+                value={profile.vehicle}
+                onChange={e => handleProfileChange("vehicle", e.target.value)}
+                placeholder="e.g. TN-01-AB-1234"
+                className="h-12 px-4 rounded-xl border-none outline-none text-white text-sm font-medium"
+                style={{ background: C.surfaceContainerHigh }}
+              />
+            </label>
           </div>
         </div>
 
@@ -247,6 +312,33 @@ export default function Profile({ location }) {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Section 2b: Emergency Beacon */}
+        <div
+          className="rounded-[28px] p-5 flex flex-col gap-4"
+          style={{ background: C.surfaceContainer }}
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-md font-black tracking-wider text-[#ffb4ab] uppercase flex items-center gap-2">
+              <User className="h-5 w-5 text-[#ff5449]" /> Emergency Beacon
+            </h2>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={profile.lockScreenBeacon !== false} // Default true
+                onChange={e => {
+                  triggerHaptic("light");
+                  handleProfileChange("lockScreenBeacon", e.target.value === "on" ? e.target.checked : e.target.checked);
+                }}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+            </label>
+          </div>
+          <p className="text-[13px] text-[#d0c4b5] leading-relaxed">
+            Show Emergency Beacon automatically when app is opened (Lock Screen mode) to provide immediate responder access without navigation.
+          </p>
         </div>
 
         {/* Section 3: Safety Check Timer */}

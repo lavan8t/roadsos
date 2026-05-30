@@ -129,7 +129,7 @@ export function LocationCard({ location }) {
   );
 }
 
-export function PageHeader({ title, backTo = "/" }) {
+export function PageHeader({ title, backTo = "/", rightAction }) {
   const navigate = useNavigate();
   return (
     <div className="flex items-center gap-4 w-full mb-6 z-10">
@@ -144,11 +144,16 @@ export function PageHeader({ title, backTo = "/" }) {
         <ArrowLeft className="h-6 w-6" />
       </button>
       <h1
-        className="text-[22px] font-black tracking-wide"
+        className="text-[22px] font-black tracking-wide flex-1"
         style={{ color: C.onSurface }}
       >
         {title}
       </h1>
+      {rightAction && (
+        <div className="ml-auto flex items-center justify-center">
+          {rightAction}
+        </div>
+      )}
     </div>
   );
 }

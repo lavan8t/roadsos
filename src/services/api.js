@@ -1,7 +1,7 @@
 import { Hospital, ShieldAlert, Wrench, CarFront, CircleDot, MapPin, Fuel } from "lucide-react";
 import { C } from "../constants/theme";
 
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+export function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
@@ -25,7 +25,7 @@ function getWorkingPhoneNumber(el, category) {
 
   // Fallback to correct emergency numbers if no specific phone is listed
   if (category === "Medical") return "108";
-  if (category === "Police") return "100";
+  if (category === "Police") return "112";
 
   return "N/A";
 }
@@ -61,14 +61,14 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000, categoryF
       let color = C.surfaceContainerHigh;
       let onColor = C.onSurface;
 
-      switch(category) {
+      switch (category) {
         case "Medical": icon = Hospital; color = C.greenContainer; onColor = C.onGreenContainer; break;
         case "Police": icon = ShieldAlert; color = C.blueContainer; onColor = C.onBlueContainer; break;
-        case "Puncture Shop": icon = CircleDot; color = C.surfaceContainerHigh; onColor = C.onYellowContainer; break;
-        case "Showroom": icon = CarFront; color = C.surfaceContainerHigh; onColor = C.onSurfaceVariant; break;
-        case "Fuel Station": icon = Fuel; color = C.surfaceContainerHigh; onColor = "#fb923c"; break; // Orange tint for fuel
-        case "Nearby City": icon = MapPin; color = C.surfaceContainerHigh; onColor = C.onSurface; break;
-        case "Mechanic": icon = Wrench; color = C.surfaceContainerHigh; onColor = C.onYellowContainer; break;
+        case "Puncture Shop": icon = CircleDot; color = "#d97706"; onColor = "#ffffff"; break;
+        case "Showroom": icon = CarFront; color = "#b45309"; onColor = "#ffffff"; break;
+        case "Fuel Station": icon = Fuel; color = "#be123c"; onColor = "#ffffff"; break;
+        case "Nearby City": icon = MapPin; color = "#6b21a8"; onColor = "#ffffff"; break;
+        case "Mechanic": icon = Wrench; color = "#b45309"; onColor = "#ffffff"; break;
       }
 
       const placeLat = props.lat;
@@ -127,9 +127,9 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000, categoryF
 
   // Map categoryFilter to specific Geoapify categories to preserve the 100 limit for the requested type
   let categoriesToFetch = "healthcare,service.police,service.vehicle,commercial.vehicle,commercial.gas,building.commercial,populated_place";
-  
+
   if (categoryFilter) {
-    switch(categoryFilter) {
+    switch (categoryFilter) {
       case "Medical": categoriesToFetch = "healthcare"; break;
       case "Police": categoriesToFetch = "service.police,amenity.police"; break;
       case "Puncture Shop": categoriesToFetch = "service.vehicle.tyre,commercial.vehicle.tyre"; break;
@@ -161,7 +161,7 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000, categoryF
     return processFormattedResults(formattedResults);
 
   } catch (error) {
-    console.error("Geoapify Fetch Failed, falling back to cache:", error);
+    console.log("[Network] Geoapify fetch failed, falling back to cache.");
     try {
       const cached = localStorage.getItem("roadsos_cached_pois");
       if (cached) {
@@ -173,7 +173,7 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000, categoryF
         }
         return processFormattedResults(localMatches);
       }
-    } catch (e) {}
+    } catch (e) { }
     return [];
   }
 }
@@ -200,12 +200,12 @@ export async function cacheRouteAhead(lat, lng) {
       }
     }
   } catch (error) {
-    console.warn("Failed to cache route ahead:", error);
+    // Silently ignore background route cache failures
   }
 }
 
 export async function fetchAreaName(lat, lng) {
-  if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+  if (!navigator.onLine || !lat || !lng || isNaN(lat) || isNaN(lng)) return "GPS Location";
 
   try {
     const res = await fetch(
@@ -251,31 +251,93 @@ export async function fetchAreaName(lat, lng) {
     }
     return roadRef || areaDisplay || "GPS Location";
   } catch (error) {
-    console.error("Failed to reverse geocode location:", error);
+    // Suppress network errors
     return "GPS Location";
+  }
+}
+
+export async function searchDestination(query, currentLat, currentLng) {
+  if (!navigator.onLine || !query) return [];
+  
+  try {
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+    if (apiKey) {
+      // Use Geoapify Autocomplete
+      let geoUrl = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&limit=5&apiKey=${apiKey}`;
+      
+      // Bias to current location if available
+      if (currentLat && currentLng) {
+        geoUrl += `&bias=proximity:${currentLng},${currentLat}`;
+      }
+
+      const res = await fetch(geoUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.features && data.features.length > 0) {
+          return data.features.map(f => {
+            const props = f.properties;
+            return {
+              lat: props.lat,
+              lng: props.lon,
+              name: props.formatted || props.name || query
+            };
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Geoapify autocomplete failed, falling back to Nominatim", e);
+  }
+
+  // Fallback to Nominatim if Geoapify fails or no key
+  try {
+    let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`;
+
+    if (currentLat && currentLng) {
+      const viewbox = `${currentLng - 1},${currentLat + 1},${currentLng + 1},${currentLat - 1}`;
+      url += `&viewbox=${viewbox}&bounded=0`;
+    }
+
+    const res = await fetch(url, {
+      headers: { "User-Agent": "RoadSOS-PWA-App" }
+    });
+
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data && data.length > 0) {
+      return data.map(item => ({
+        lat: parseFloat(item.lat),
+        lng: parseFloat(item.lon),
+        name: item.display_name
+      }));
+    }
+    return [];
+  } catch (e) {
+    // Suppress network errors
+    return [];
   }
 }
 
 export function triggerEmergencySMS(profile, contacts, location, event = "SOS_TRIGGERED") {
   if (!contacts || contacts.length === 0) return;
-  
+
   const validContacts = contacts.filter(c => c.phone);
   if (validContacts.length === 0) return;
 
   const phones = validContacts.map(c => c.phone).join(",");
   const mapUrl = location?.rawLat ? `https://maps.google.com/?q=${location.rawLat},${location.rawLng}` : 'Unknown Location';
-  
+
   const message = `EMERGENCY ALERT: ${event}
 Name: ${profile?.name || 'Unknown'}
 Blood Group: ${profile?.bloodGroup || 'Unknown'}
 Allergies: ${profile?.allergies || 'None'}
 Location: ${mapUrl}`;
-  
+
   const encodedMsg = encodeURIComponent(message);
-  
+
   // iOS uses &, Android uses ?
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const separator = isIOS ? "&" : "?";
-  
+
   window.location.href = `sms:${phones}${separator}body=${encodedMsg}`;
 }
