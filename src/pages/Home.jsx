@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { TriangleAlert, Search, Share2, FileWarning } from "lucide-react";
+import { Plus, Compass, FileWarning, TriangleAlert } from "lucide-react";
 import { StatusHeader, LocationCard } from "../components/Shared";
 import { C } from "../constants/theme";
 
@@ -31,7 +31,7 @@ export default function Home({ status }) {
               className="h-16 w-16 mb-2 animate-pulse"
               strokeWidth={2.5}
             />
-            <span className="text-[44px] font-black leading-none tracking-widest">
+            <span className="text-[44px] font-black leading-none tracking-widest animate-pulse">
               SOS
             </span>
           </button>
@@ -42,7 +42,7 @@ export default function Home({ status }) {
             onClick={() => navigate("/help")}
             className="flex flex-col items-center justify-center gap-2 rounded-[20px] p-3 cursor-pointer md-ripple border-none h-24 bg-[#2b2927] text-[#d0c4b5]"
           >
-            <Search className="h-7 w-7" />
+            <Plus className="h-10 w-10 text-[#ffb4ab]" strokeWidth={3} />
             <span className="text-[13px] font-bold">Nearby</span>
           </button>
           <button
@@ -54,14 +54,14 @@ export default function Home({ status }) {
             }
             className="flex flex-col items-center justify-center gap-2 rounded-[20px] p-3 cursor-pointer md-ripple border-none h-24 bg-[#004a77] text-[#c1e8ff]"
           >
-            <Share2 className="h-7 w-7" />
+            <Compass className="h-10 w-10 text-[#c1e8ff]" />
             <span className="text-[13px] font-bold">Share Loc</span>
           </button>
           <button
             onClick={() => navigate("/report")}
             className="flex flex-col items-center justify-center gap-2 rounded-[20px] p-3 cursor-pointer md-ripple border-none h-24 bg-[#4b4319] text-[#e8d468]"
           >
-            <FileWarning className="h-7 w-7" />
+            <FileWarning className="h-10 w-10 text-[#e8d468]" />
             <span className="text-[13px] font-bold">Report</span>
           </button>
         </div>

@@ -1,26 +1,47 @@
 import React, { useState, useEffect } from "react";
-import { Phone, Navigation, Check, Loader2 } from "lucide-react";
-import { PageHeader } from "../components/Shared";
+import { useNavigate } from "react-router-dom";
+import { Phone, Navigation, Loader2 } from "lucide-react";
+import { PageHeader, triggerHaptic } from "../components/Shared";
 import { fetchRealNearbyServices } from "../services/api";
 import { C } from "../constants/theme";
 
 export default function NearbyHelp({ location }) {
+  const navigate = useNavigate();
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const abortController = new AbortController();
+    let isActive = true;
+
     async function loadPlaces() {
       if (location.rawLat && location.rawLng) {
         setLoading(true);
-        const data = await fetchRealNearbyServices(
-          location.rawLat,
-          location.rawLng,
-        );
-        setPlaces(data);
-        setLoading(false);
+        try {
+          const data = await fetchRealNearbyServices(
+            location.rawLat,
+            location.rawLng,
+            5000,
+            abortController.signal,
+          );
+          if (isActive) {
+            setPlaces(data);
+            setLoading(false);
+          }
+        } catch (error) {
+          if (isActive && error.name !== "AbortError") {
+            setPlaces([]);
+            setLoading(false);
+          }
+        }
       }
     }
     loadPlaces();
+
+    return () => {
+      isActive = false;
+      abortController.abort();
+    };
   }, [location.rawLat, location.rawLng]);
 
   return (
@@ -45,7 +66,7 @@ export default function NearbyHelp({ location }) {
           places.map((place) => (
             <div
               key={place.id}
-              className="w-full rounded-[24px] p-4 flex flex-col gap-4 md-elevation-1"
+              className="w-full rounded-[24px] p-4 flex flex-col gap-4"
               style={{ background: C.surfaceContainer }}
             >
               <div className="flex items-start justify-between">
@@ -80,29 +101,40 @@ export default function NearbyHelp({ location }) {
                         {place.distance}
                       </span>
                     </div>
+                    {place.phone && place.phone !== "N/A" && (
+                      <div className="text-[13px] mt-1.5 font-mono text-[#d0c4b5] flex items-center gap-1.5">
+                        <Phone className="h-3.5 w-3.5 opacity-70 text-[#ffb4ab]" />
+                        <span>{place.phone}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-1">
+              <div className="grid grid-cols-2 gap-3 mt-2">
                 <a
-                  href={`tel:${place.phone}`}
-                  className="rounded-xl py-2.5 flex items-center justify-center gap-2 font-bold text-[14px] bg-[#363431] text-[#eae0d4] no-underline"
+                  href={place.phone !== "N/A" ? `tel:${place.phone}` : "#"}
+                  onClick={(e) => {
+                    if (place.phone === "N/A") e.preventDefault();
+                    triggerHaptic("heavy");
+                  }}
+                  className={`rounded-xl py-3 flex items-center justify-center gap-2 font-bold text-[15px] no-underline hover:brightness-110 active:scale-95 transition-all shadow-lg ${place.phone !== "N/A" ? "bg-green-600 text-white animate-pulse shadow-green-900/50" : "bg-[#363431] text-gray-500 cursor-not-allowed"}`}
                 >
-                  <Phone className="h-4 w-4" />{" "}
-                  {place.phone !== "N/A" ? "Call" : "Unavailable"}
+                  <Phone className="h-5 w-5" />{" "}
+                  {place.phone !== "N/A" ? `Call ${place.phone}` : "Unavailable"}
                 </a>
                 <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`}
+                  href={`https://www.google.com/maps/dir/?api=1&origin=${location.rawLat},${location.rawLng}&destination=${place.lat},${place.lng}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-xl py-2.5 flex items-center justify-center gap-2 font-bold text-[14px] border-none outline-none no-underline"
+                  onClick={() => triggerHaptic("light")}
+                  className="rounded-xl py-3 flex items-center justify-center gap-2 font-bold text-[15px] border-none outline-none no-underline hover:brightness-110 active:scale-95 transition-all shadow-lg"
                   style={{
                     background: C.primaryContainer,
                     color: C.onPrimaryContainer,
                   }}
                 >
-                  <Navigation className="h-4 w-4" /> Direct
+                  <Navigation className="h-5 w-5" /> Direct
                 </a>
               </div>
             </div>
