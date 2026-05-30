@@ -2,10 +2,33 @@
 
 @theme {
   --font-sans:
-    "Plus Jakarta Sans", Roboto, system-ui, -apple-system, sans-serif;
+    "Google Sans Flex", Roboto, system-ui, -apple-system, sans-serif;
+}
+
+.title-font {
+  font-family: "Google Sans Flex", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+  font-variation-settings:
+    "slnt" 0,
+    "wdth" 134.5,
+    "GRAD" 100,
+    "ROND" 100;
+}
+
+.roadsos-title {
+  font-family: "Google Sans Flex", sans-serif;
+  font-style: normal;
+  font-variation-settings:
+    "ROND" 100,
+    "wdth" 130,
+    "wght" 1000;
+  font-weight: 1000;
 }
 
 @layer base {
+
   *,
   *::before,
   *::after {
@@ -20,7 +43,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #eae0d4;
-    overflow: hidden; /* For bg animation */
+    overflow: hidden;
+    /* For bg animation */
   }
 
   #root {
@@ -34,32 +58,26 @@
   }
 }
 
-/* Material Design 3 shadow elevations */
-.md-elevation-1 {
-  box-shadow:
-    0 1px 3px 1px rgba(0, 0, 0, 0.15),
-    0 1px 2px 0 rgba(0, 0, 0, 0.3);
-}
-.md-elevation-2 {
-  box-shadow:
-    0 2px 6px 2px rgba(0, 0, 0, 0.15),
-    0 1px 2px 0 rgba(0, 0, 0, 0.3);
-}
-
 /* Material You organic morphing background */
 @keyframes md-morph-color {
   0% {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    background-color: #690005; /* Dark MD3 Red */
+    background-color: #690005;
+    /* Dark MD3 Red */
   }
+
   33% {
     border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-    background-color: #93000a; /* Medium MD3 Red */
+    background-color: #93000a;
+    /* Medium MD3 Red */
   }
+
   66% {
     border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
-    background-color: #ff5449; /* Vibrant MD3 SOS Red */
+    background-color: #ff5449;
+    /* Vibrant MD3 SOS Red */
   }
+
   100% {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
     background-color: #690005;
@@ -79,8 +97,10 @@
   animation: md-morph-color 6s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
-  filter: blur(20px); /* Blends the shapes together */
-  mix-blend-mode: screen; /* Enhances color merging on dark bg */
+  filter: blur(20px);
+  /* Blends the shapes together */
+  mix-blend-mode: screen;
+  /* Enhances color merging on dark bg */
 }
 
 .radar-ring:nth-child(2) {
@@ -90,7 +110,8 @@
   margin-top: -37.5vmin;
   animation-duration: 8s;
   animation-direction: reverse;
-  opacity: 0.6; /* Static opacity for layered effect */
+  opacity: 0.6;
+  /* Static opacity for layered effect */
 }
 
 .radar-ring:nth-child(3) {
@@ -99,8 +120,10 @@
   margin-left: -40vmin;
   margin-top: -40vmin;
   animation-duration: 10s;
-  opacity: 0.3; /* Static opacity for layered effect */
-  display: block; /* Turn the 3rd ring back on for depth */
+  opacity: 0.3;
+  /* Static opacity for layered effect */
+  display: block;
+  /* Turn the 3rd ring back on for depth */
 }
 
 /* Interactive ripple effect approximation */
@@ -108,6 +131,7 @@
   position: relative;
   overflow: hidden;
 }
+
 .md-ripple::after {
   content: "";
   position: absolute;
@@ -123,6 +147,7 @@
     transform 0.3s,
     opacity 0.3s;
 }
+
 .md-ripple:active::after {
   transform: translate(-50%, -50%) scale(2.5);
   opacity: 0.15;
@@ -135,8 +160,22 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes blink {
+  0%, 90%, 100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.05);
+  }
+}
+
+.animate-blink {
+  animation: blink 4s infinite;
 }

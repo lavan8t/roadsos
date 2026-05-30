@@ -4,58 +4,36 @@ import {
   WifiOff,
   Wifi,
   MapPin,
-  Copy,
   Check,
   ArrowLeft,
-  Settings,
 } from "lucide-react";
 import { C } from "../constants/theme";
 
-export function AppLogo() {
-  return (
-    <svg viewBox="0 0 32 32" className="h-9 w-9 flex-shrink-0" fill="none">
-      <path
-        d="M16 2 L28 6 V14 C28 22 22 28 16 30 C10 28 4 22 4 14 V6 Z"
-        fill={C.primaryContainer}
-      />
-      <path
-        d="M12 30 L16 12 L20 30"
-        stroke={C.onPrimaryContainer}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="16" cy="12" r="3" fill={C.primary} />
-    </svg>
-  );
+export function triggerHaptic(type = "light") {
+  if (!navigator.vibrate) return;
+  try {
+    if (type === "light") {
+      navigator.vibrate(12);
+    } else if (type === "medium") {
+      navigator.vibrate(35);
+    } else if (type === "heavy") {
+      navigator.vibrate([80, 50, 80]);
+    }
+  } catch (e) {
+    console.warn("Haptic trigger failed", e);
+  }
 }
 
 export function StatusHeader({ isOnline }) {
   const navigate = useNavigate();
   return (
     <div
-      className="flex items-center justify-between w-full pb-2"
+      className="grid grid-cols-3 items-center w-full pb-2"
       style={{ animation: "slide-up-md 0.3s ease-out both" }}
     >
-      <div className="flex items-center gap-2.5">
-        <AppLogo />
-        <h1
-          className="text-[24px] font-black tracking-wide"
-          style={{ color: C.onSurface }}
-        >
-          Road<span style={{ color: C.primary }}>SoS</span>
-        </h1>
-      </div>
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate("/settings")}
-          className="h-10 w-10 rounded-full flex items-center justify-center bg-transparent border-none outline-none"
-          style={{ color: C.onSurfaceVariant }}
-        >
-          <Settings className="h-6 w-6" />
-        </button>
+      <div className="flex justify-start">
         <div
-          className="flex items-center justify-center h-10 w-10 rounded-full md-elevation-1"
+          className="flex items-center justify-center h-10 w-10 rounded-full"
           style={{ background: C.surfaceContainerHigh }}
         >
           {isOnline ? (
@@ -65,6 +43,28 @@ export function StatusHeader({ isOnline }) {
           )}
         </div>
       </div>
+
+      <div className="flex items-center justify-center">
+        <h1
+          className="text-[24px] tracking-wide roadsos-title"
+          style={{ color: C.onSurface }}
+        >
+          RoadSOS
+        </h1>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          onClick={() => {
+            triggerHaptic("light");
+            navigate("/profile");
+          }}
+          className="h-10 w-10 rounded-full flex items-center justify-center bg-transparent border-none outline-none cursor-pointer hover:bg-white/5 active:scale-95 transition-all"
+          style={{ color: C.onSurfaceVariant }}
+        >
+          <span className="material-symbols-rounded text-[28px] leading-none">account_circle</span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -72,56 +72,58 @@ export function StatusHeader({ isOnline }) {
 export function LocationCard({ location }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = useCallback(() => {
-    navigator.clipboard
-      ?.writeText(`${location.lat}, ${location.lng}`)
-      .catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (location.lat && location.lng) {
+      triggerHaptic("light");
+      navigator.clipboard
+        ?.writeText(`${location.lat}, ${location.lng}`)
+        .catch(() => {});
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   }, [location]);
+
+  const isDenied = location.status === "denied";
+  const isPending = location.status === "pending";
 
   return (
     <button
       onClick={handleCopy}
-      className="w-full rounded-[24px] p-4 flex items-center gap-4 z-10 md-elevation-1 md-ripple border-none outline-none cursor-pointer text-left"
-      style={{ background: C.surfaceContainer }}
+      className="w-full flex items-center justify-center gap-3 z-10 border-none outline-none cursor-pointer bg-transparent py-3 px-4 hover:opacity-90 active:scale-[0.99] transition-all"
     >
-      <div
-        className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full"
-        style={{ background: C.surfaceContainerHigh }}
-      >
+      {copied ? (
+        <Check className="h-6 w-6 text-green-400 flex-shrink-0" strokeWidth={3} />
+      ) : (
         <MapPin
-          className="h-6 w-6"
-          style={{ color: C.primary }}
-          strokeWidth={1.8}
+          className="h-6 w-6 flex-shrink-0"
+          style={{ color: isDenied ? C.error : C.primary }}
+          strokeWidth={3}
         />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p
-          className="text-[18px] font-bold tracking-wide flex items-center gap-2"
+      )}
+      <div className="text-left">
+        <h2
+          className="text-[18px] font-extrabold tracking-wide leading-tight"
           style={{ color: C.onSurface }}
         >
-          {location.lat}, {location.lng}
-          {location.cached && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-900 text-yellow-200">
-              Cached
-            </span>
-          )}
-        </p>
-        <p
-          className="text-[13px] font-medium mt-0.5 truncate"
-          style={{ color: C.onSurfaceVariant }}
-        >
           {location.name}
-        </p>
-      </div>
-      <div
-        className="flex items-center justify-center h-10 w-10 rounded-full flex-shrink-0"
-        style={{
-          background: copied ? C.greenContainer : "transparent",
-          color: copied ? C.onGreenContainer : C.onSurfaceVariant,
-        }}
-      >
-        {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+        </h2>
+        {(copied || isDenied || isPending) && (
+          <p
+            className="text-[13px] font-medium mt-1.5 flex items-center gap-1.5"
+            style={{ color: copied ? C.primary : C.onSurfaceVariant }}
+          >
+            {copied && "Copied!"}
+            {isDenied && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-900 text-red-200">
+                Denied
+              </span>
+            )}
+            {isPending && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-900 text-yellow-200">
+                Locating...
+              </span>
+            )}
+          </p>
+        )}
       </div>
     </button>
   );
@@ -132,7 +134,10 @@ export function PageHeader({ title, backTo = "/" }) {
   return (
     <div className="flex items-center gap-4 w-full mb-6 z-10">
       <button
-        onClick={() => navigate(backTo)}
+        onClick={() => {
+          triggerHaptic("light");
+          navigate(backTo);
+        }}
         className="h-12 w-12 rounded-full flex items-center justify-center md-ripple cursor-pointer border-none outline-none"
         style={{ background: C.surfaceContainerHigh, color: C.onSurface }}
       >
