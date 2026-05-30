@@ -149,7 +149,7 @@ export default function Profile({ location }) {
 
       <div className="flex flex-col gap-6 z-10 w-full max-w-md mx-auto">
         {/* Emergency Beacon QR */}
-        <EmergencyBeacon profile={profile} defaultExpanded={true} />
+        <EmergencyBeacon profile={profile} />
 
         {/* Section 1: Emergency Information */}
         <div
