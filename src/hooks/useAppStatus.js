@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchAreaName } from "../services/api";
+import { fetchAreaName, cacheRouteAhead } from "../services/api";
+
+let lastCacheTime = 0;
+const CACHE_THROTTLE_MS = 15 * 60 * 1000; // 15 mins
 
 export function useAppStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -57,6 +60,12 @@ export function useAppStatus() {
             name: areaName || "GPS Location",
           }));
         });
+
+        // Trigger background route-ahead caching if online and interval elapsed
+        if (navigator.onLine && Date.now() - lastCacheTime > CACHE_THROTTLE_MS) {
+          lastCacheTime = Date.now();
+          cacheRouteAhead(latVal, lngVal);
+        }
       },
       (err) => {
         console.warn("Geolocation Error:", err.message);

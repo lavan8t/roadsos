@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Plus, Compass, FileWarning, TriangleAlert } from "lucide-react";
 import { StatusHeader, LocationCard } from "../components/Shared";
 import { C } from "../constants/theme";
+import NearbyHelp from "./NearbyHelp";
 
 export default function Home({ status }) {
   const navigate = useNavigate();
+  const [showNearby, setShowNearby] = React.useState(false);
   const { isOnline, location } = status;
 
   return (
@@ -39,7 +41,7 @@ export default function Home({ status }) {
 
         <div className="grid grid-cols-3 gap-3 z-10 w-full mb-2">
           <button
-            onClick={() => navigate("/help")}
+            onClick={() => setShowNearby(true)}
             className="flex flex-col items-center justify-center gap-2 rounded-[20px] p-3 cursor-pointer md-ripple border-none h-24 bg-[#2b2927] text-[#d0c4b5]"
           >
             <Plus className="h-10 w-10 text-[#ffb4ab]" strokeWidth={3} />
@@ -66,6 +68,13 @@ export default function Home({ status }) {
           </button>
         </div>
       </div>
+      
+      {showNearby && (
+        <NearbyHelp 
+          location={location} 
+          onClose={() => setShowNearby(false)} 
+        />
+      )}
     </div>
   );
 }

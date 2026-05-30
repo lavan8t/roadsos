@@ -167,6 +167,10 @@
   }
 }
 
+.animate-slide-up {
+  animation: slide-up-md 0.4s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
 @keyframes blink {
   0%, 90%, 100% {
     transform: scaleY(1);
