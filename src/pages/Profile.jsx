@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ShieldAlert, Heart, Phone, Clock, Save, BellRing, FileJson, XCircle } from "lucide-react";
+import { User, ShieldAlert, Heart, Phone, Clock, Save, BellRing, FileJson, XCircle, MessageCircleWarning } from "lucide-react";
 import { PageHeader, triggerHaptic } from "../components/Shared";
+import { triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
 
 export default function Profile({ location }) {
@@ -345,18 +346,29 @@ export default function Profile({ location }) {
         )}
 
         {/* Dev Options */}
-        <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center gap-2">
+        <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center gap-3">
           <p className="text-xs font-bold text-white/30 uppercase tracking-widest">Developer Options</p>
-          <button
-            onClick={() => {
-              triggerHaptic("heavy");
-              localStorage.removeItem("roadsos_onboarded");
-              window.location.href = "/";
-            }}
-            className="px-6 py-2 rounded-full border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
-          >
-            Reset Onboarding
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                triggerHaptic("heavy");
+                localStorage.removeItem("roadsos_onboarded");
+                window.location.href = "/";
+              }}
+              className="px-6 py-2 rounded-full border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
+            >
+              Reset Onboarding
+            </button>
+            <button
+              onClick={() => {
+                triggerHaptic("heavy");
+                navigate("/crash");
+              }}
+              className="px-6 py-2 rounded-full border border-orange-500/30 text-orange-400 text-xs font-bold hover:bg-orange-500/10 active:scale-95 transition-all cursor-pointer"
+            >
+              Simulate Car Crash
+            </button>
+          </div>
         </div>
       </div>
     </div>

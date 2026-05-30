@@ -9,6 +9,7 @@ import { triggerHaptic } from "./components/Shared";
 import Home from "./pages/Home";
 import NearbyHelp from "./pages/NearbyHelp";
 import SosFlow from "./pages/SosFlow";
+import CrashFlow from "./pages/CrashFlow";
 import ReportIncident from "./pages/ReportIncident";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
@@ -210,6 +211,7 @@ function AppContent() {
 
         {/* Standard App Routes */}
         <Route path="/sos" element={<SosFlow location={status.location} />} />
+        <Route path="/crash" element={<CrashFlow location={status.location} />} />
         <Route path="/help" element={<NearbyHelp location={status.location} />} />
         <Route path="/report" element={<ReportIncident location={status.location} />} />
         <Route path="/profile" element={<Profile location={status.location} />} />

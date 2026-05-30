@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, Navigation, XCircle, Loader2, TriangleAlert } from "lucide-react";
-import { fetchRealNearbyServices } from "../services/api";
+import { Phone, Navigation, XCircle, Loader2, TriangleAlert, MessageCircleWarning } from "lucide-react";
+import { fetchRealNearbyServices, triggerEmergencySMS } from "../services/api";
 import { C } from "../constants/theme";
 import { triggerHaptic } from "../components/Shared";
 
@@ -157,9 +157,18 @@ export default function SosFlow({ location }) {
               <h1 className="text-3xl font-black mb-1 text-red-400 tracking-widest uppercase animate-pulse">
                 SOS Active
               </h1>
-              <p className="text-sm text-green-300 font-bold">
-                108 Dialer Triggered • SMS Alerts Dispatched
+              <p className="text-sm text-green-300 font-bold mb-4">
+                108 Dialer Triggered
               </p>
+              <button
+                onClick={() => {
+                  triggerHaptic("heavy");
+                  triggerEmergencySMS(profileRef.current, contactsRef.current, location);
+                }}
+                className="w-full max-w-[200px] h-12 mx-auto rounded-full flex items-center justify-center gap-2 text-sm font-bold bg-orange-600 text-white border-none active:scale-95 transition-transform cursor-pointer shadow-lg shadow-orange-600/30"
+              >
+                <MessageCircleWarning className="h-4 w-4" /> Send SMS Alerts
+              </button>
             </>
           )}
         </div>
