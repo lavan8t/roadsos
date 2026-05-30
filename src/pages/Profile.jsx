@@ -100,6 +100,10 @@ export default function Profile({ location }) {
         setErrorMsg("Please select your Blood Group.");
         return;
       }
+      if (!profile.aadhaar || !/^\d{12}$/.test(profile.aadhaar.trim())) {
+        setErrorMsg("Please enter a valid 12-digit Aadhaar Number.");
+        return;
+      }
 
       // Filter valid contacts
       const validContacts = contacts.filter(c => c.name.trim() && c.phone.trim().length >= 7);
@@ -226,6 +230,19 @@ export default function Profile({ location }) {
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
               </select>
+            </label>
+
+            <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">
+              Aadhaar Number
+              <input
+                type="text"
+                value={profile.aadhaar || ""}
+                maxLength={12}
+                onChange={e => handleProfileChange("aadhaar", e.target.value.replace(/\D/g, ''))}
+                placeholder="12-digit Aadhaar Number"
+                className="h-12 px-4 rounded-xl border-none outline-none text-white text-sm font-medium"
+                style={{ background: C.surfaceContainerHigh }}
+              />
             </label>
 
             <label className="flex flex-col text-[13px] font-bold text-[#d0c4b5] gap-1.5">

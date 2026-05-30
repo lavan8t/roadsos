@@ -80,6 +80,12 @@ export default function RescuerView({ profile, onClose }) {
                 <span className="text-lg font-black text-white">{profile.gender}</span>
               </div>
             )}
+            {profile.aadhaar && (
+              <div className="px-4 py-2 bg-white/10 rounded-xl flex items-center gap-2">
+                <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">Aadhaar</span>
+                <span className="text-lg font-black text-white">{profile.aadhaar}</span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { Hospital, ShieldAlert, Wrench, CarFront, CircleDot, MapPin, Fuel } from "lucide-react";
+import { Hospital, ShieldAlert, Wrench, CarFront, CircleDot, MapPin, Fuel, Pill } from "lucide-react";
 import { C } from "../constants/theme";
 
 export function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -49,7 +49,8 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000, categoryF
 
       let category = "Mechanic";
       const categories = props.categories || [];
-      if (categories.some(c => c.startsWith("healthcare"))) category = "Medical";
+      if (categories.some(c => c.includes("pharmacy") || c.includes("chemist"))) category = "Pharmacy";
+      else if (categories.some(c => c.startsWith("healthcare"))) category = "Medical";
       else if (categories.some(c => c.startsWith("service.police"))) category = "Police";
       else if (categories.some(c => c.includes("vehicle.tyre") || c.includes("tyre"))) category = "Puncture Shop";
       else if (categories.some(c => c.includes("vehicle.dealer") || c.includes("showroom"))) category = "Showroom";
@@ -63,6 +64,7 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000, categoryF
 
       switch (category) {
         case "Medical": icon = Hospital; color = C.greenContainer; onColor = C.onGreenContainer; break;
+        case "Pharmacy": icon = Pill; color = "#0f766e"; onColor = "#ffffff"; break;
         case "Police": icon = ShieldAlert; color = C.blueContainer; onColor = C.onBlueContainer; break;
         case "Puncture Shop": icon = CircleDot; color = "#d97706"; onColor = "#ffffff"; break;
         case "Showroom": icon = CarFront; color = "#b45309"; onColor = "#ffffff"; break;
@@ -130,7 +132,8 @@ export async function fetchRealNearbyServices(lat, lng, radius = 5000, categoryF
 
   if (categoryFilter) {
     switch (categoryFilter) {
-      case "Medical": categoriesToFetch = "healthcare"; break;
+      case "Medical": categoriesToFetch = "healthcare.hospital,healthcare.clinic"; break;
+      case "Pharmacy": categoriesToFetch = "healthcare.pharmacy,commercial.health_and_beauty.chemist"; break;
       case "Police": categoriesToFetch = "service.police,amenity.police"; break;
       case "Puncture Shop": categoriesToFetch = "service.vehicle.tyre,commercial.vehicle.tyre"; break;
       case "Mechanic": categoriesToFetch = "service.vehicle.repair,service.vehicle"; break;
@@ -187,7 +190,7 @@ export async function cacheRouteAhead(lat, lng) {
   // 50km radius for route-ahead caching
   const CACHE_RADIUS = 50000;
   // Increase limit to 300 to ensure we get a dense map of the 50km area
-  const url = `https://api.geoapify.com/v2/places?categories=healthcare,service.police,service.vehicle,commercial.vehicle,commercial.gas,building.commercial,populated_place&filter=circle:${lng},${lat},${CACHE_RADIUS}&limit=300&apiKey=${apiKey}`;
+  const url = `https://api.geoapify.com/v2/places?categories=healthcare,healthcare.pharmacy,commercial.health_and_beauty.chemist,service.police,service.vehicle,commercial.vehicle,commercial.gas,building.commercial,populated_place&filter=circle:${lng},${lat},${CACHE_RADIUS}&limit=300&apiKey=${apiKey}`;
 
   try {
     const response = await fetch(url);

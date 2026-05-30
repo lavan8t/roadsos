@@ -13,6 +13,7 @@ export default function Onboarding({ finishOnboarding }) {
     // Step 2 profile details state
     const [name, setName] = useState("");
     const [bloodGroup, setBloodGroup] = useState("");
+    const [aadhaar, setAadhaar] = useState("");
     const [contacts, setContacts] = useState([
         { name: "", phone: "" },
         { name: "", phone: "" }
@@ -92,6 +93,10 @@ export default function Onboarding({ finishOnboarding }) {
             setErrorMsg("Please select your Blood Group.");
             return;
         }
+        if (!aadhaar.trim() || !/^\d{12}$/.test(aadhaar.trim())) {
+            setErrorMsg("Please enter a valid 12-digit Aadhaar Number.");
+            return;
+        }
 
         const validContacts = contacts.filter(c => c.name.trim() && c.phone.trim().length >= 7);
         if (validContacts.length === 0) {
@@ -105,6 +110,7 @@ export default function Onboarding({ finishOnboarding }) {
         const profileObj = {
             name: name.trim(),
             bloodGroup,
+            aadhaar: aadhaar.trim(),
             conditions: "",
             allergies: ""
         };
@@ -228,6 +234,19 @@ export default function Onboarding({ finishOnboarding }) {
                                     <option value="O+">O+</option>
                                     <option value="O-">O-</option>
                                 </select>
+                            </label>
+
+                            <label className="flex flex-col text-[12px] font-bold text-[#d0c4b5] gap-1">
+                                Aadhaar Number
+                                <input
+                                    type="text"
+                                    placeholder="12-digit Aadhaar Number"
+                                    value={aadhaar}
+                                    maxLength={12}
+                                    onChange={(e) => setAadhaar(e.target.value.replace(/\D/g, ''))}
+                                    className="h-12 px-4 rounded-xl border-none outline-none text-white text-sm font-medium"
+                                    style={{ background: C.surfaceContainerHigh }}
+                                />
                             </label>
                         </div>
                     </div>

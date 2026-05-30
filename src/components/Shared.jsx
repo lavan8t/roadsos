@@ -6,6 +6,7 @@ import {
   MapPin,
   Check,
   ArrowLeft,
+  User,
 } from "lucide-react";
 import { C } from "../constants/theme";
 
@@ -59,10 +60,10 @@ export function StatusHeader({ isOnline }) {
             triggerHaptic("light");
             navigate("/profile");
           }}
-          className="h-10 w-10 rounded-full flex items-center justify-center bg-transparent border-none outline-none cursor-pointer hover:bg-white/5 active:scale-95 transition-all"
-          style={{ color: C.onSurfaceVariant }}
+          className="h-10 w-10 rounded-full flex items-center justify-center border-none outline-none cursor-pointer active:scale-95 transition-all shadow-md"
+          style={{ background: C.primary, color: C.onPrimary }}
         >
-          <span className="material-symbols-rounded text-[28px] leading-none">account_circle</span>
+          <User className="h-5 w-5" strokeWidth={3} />
         </button>
       </div>
     </div>

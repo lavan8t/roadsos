@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, Navigation, Loader2, Hospital, ShieldAlert, Wrench, CircleDot, Fuel, MapPin, ArrowLeft, X } from "lucide-react";
+import { Phone, Navigation, Loader2, Hospital, ShieldAlert, Wrench, CircleDot, Fuel, MapPin, ArrowLeft, X, Pill } from "lucide-react";
 import { triggerHaptic } from "../components/Shared";
 import { fetchRealNearbyServices } from "../services/api";
 import { C } from "../constants/theme";
 
 const CATEGORIES = [
   { id: "Medical", name: "Hospitals", icon: Hospital, color: C.greenContainer, onColor: C.onGreenContainer },
+  { id: "Pharmacy", name: "Pharmacy", icon: Pill, color: "#0f766e", onColor: "#ffffff" },
   { id: "Police", name: "Police", icon: ShieldAlert, color: C.blueContainer, onColor: C.onBlueContainer },
   { id: "Mechanic", name: "Mechanics", icon: Wrench, color: "#b45309", onColor: "#ffffff" },
   { id: "Puncture Shop", name: "Puncture", icon: CircleDot, color: "#d97706", onColor: "#ffffff" },
